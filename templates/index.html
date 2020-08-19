@@ -1,0 +1,17 @@
+<!doctype html>
+<title>Upload new File</title>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+	<ul class="flashes">
+	  {% for message in messages %}
+		<div class="message_flash">{{ message }}</div>
+	  {% endfor %}
+	</ul>
+  {% endif %}
+{% endwith %}
+<h1>Upload new File</h1>
+<form method=post action="/upload-zip" enctype=multipart/form-data>
+  <input type=file name=file>
+  <input type=submit value=Upload>
+</form>
+
