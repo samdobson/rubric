@@ -10,7 +10,7 @@ from collections import OrderedDict
 from dotenv import load_dotenv
 from cookiecutter.main import cookiecutter
 from cookiecutter.exceptions import RepositoryNotFound
-from flask import Flask, flash, request, redirect, url_for, render_template
+from flask import Flask, flash, request, redirect, url_for, render_template, send_file
 from werkzeug.utils import secure_filename
 
 
@@ -23,24 +23,24 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = FILESIZE_LIMIT_UNCOMPRESSED * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['CLEANUP'] = False
 
 @app.route('/')
 def home():
     """Form to post Rubric zip files."""
     return render_template('index.html')
 
-def load_values(path):
-    def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
-        class OrderedLoader(Loader):
-            pass
+def load_values(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
 
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-        OrderedLoader.add_constructor(
-	    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-	    construct_mapping)
-        return yaml.load(stream, OrderedLoader)
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    construct_mapping)
+    return yaml.load(stream, OrderedLoader)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'zip'
@@ -59,25 +59,32 @@ def upload_zip():
         flash('No file received')
         return redirect('/')
     file = request.files['file']
-    if file.filename == '':
+    if not file or file.filename == '':
         flash('No selected file')
         return redirect('/')
-    if file and allowed_file(file.filename):
+    if not allowed_file(file.filename):
+        flash('Expected a zip file')
+        return redirect('/')
 
+    if 42:
         # Set up file paths.
         filename = secure_filename(file.filename)
         rand_dir = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         root_dir = os.path.join(app.config['UPLOAD_FOLDER'], rand_dir)
-        save_location = os.path.join(root_dir, filename)
+
+        save_location = os.path.join(root_dir, 'uploaded', filename)
+
         extract_path = os.path.join(root_dir, 'extracted')
         generated_path = os.path.join(root_dir, 'generated')
-        values_path = os.path.join(extract_path, 'values.yml')
+        final_zip_path = os.path.join(root_dir, 'zipped', filename)
 
         # Save.
         os.mkdir(root_dir)
+        os.mkdir(os.path.join(root_dir, 'uploaded'))
+        os.mkdir(os.path.join(root_dir, 'zipped'))
         file.save(save_location)
 
-        # Unzip.
+        # Limitation checks.
         with zipfile.ZipFile(save_location, 'r') as zip_ref:
             if not uncompressed_filesize_ok(zip_ref):
                 flash('Uncompressed filesize too large')
@@ -85,26 +92,33 @@ def upload_zip():
             if contains_nested_zip(zip_ref):
                 flash('Zip file cannot contain another zip file')
                 return redirect('/')
-            else:
-                zip_ref.extractall(extract_path)
+
+        # Unzip.
+        shutil.unpack_archive(save_location, extract_path, 'zip')
 
         # Run cookiecutter.
         try:
-            print(extract_path)
-            print(values_path)
-            print(load_values(values_path))
-            print(generated_path)
-            cookiecutter(extract_path, no_input=True, output_dir=generated_path, extra_context=load_values(values_path))
+            try:
+                values_path = os.path.join(extract_path, 'values.yml')
+                with open(values_path) as values_file_handle:
+                    vals = load_values(values_file_handle, yaml.SafeLoader)
+            except FileNotFoundError as e:
+                flash('values.yml missing')
+                return redirect('/')
+            cookiecutter(extract_path, no_input=True, output_dir=generated_path, extra_context=vals)
         except RepositoryNotFound as e:
-            flash('Not a valid Rubric template (no rubric.yml in the top level of the zip at ' + extract_path + ' or values.yaml missing')
+            flash('Not a valid Rubric template (no rubric.yml in the top level of the zip at ' + extract_path + ' or values.yml missing')
             return redirect('/')
 
         # Zip up.
+        shutil.make_archive(final_zip_path[:-4], 'zip', generated_path)
 
         # Clean up.
-        #shutil.rmtree(root_dir)
+        if app.config['CLEANUP']:
+            shutil.rmtree(root_dir)
 
         # Return.
-        return 'All done!'
+        newfilename = filename[:-4] + '-result.zip'
+        return send_file(final_zip_path, as_attachment=True, attachment_filename=newfilename)
 
 app.run(debug=True)

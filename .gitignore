@@ -1,9 +1,6 @@
-venv
+uploads/
 *.pyc
-staticfiles
 .env
-db.sqlite3
-getting-started/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
