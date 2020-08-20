@@ -1,4 +1,5 @@
-uploads/
+uploads/*
+!uploads/README.md
 *.pyc
 .env
 
