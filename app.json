@@ -1,22 +1,14 @@
 {
   "name": "Rubric",
-  "description": "Tempalte. Reuse. Share.",
+  "description": "Template. Reuse. Share.",
   "image": "heroku/python",
   "repository": "https://github.com/samdobson/rubric",
-  "keywords": ["python", "django" ],
-  "addons": [ "heroku-postgresql" ],
+  "keywords": ["python", "flask", "cookiecutter" ],
+  "success_url": "/",
   "env": {
     "SECRET_KEY": {
-      "description": "The secret key for the Django application.",
+      "description": "The secret key for the Flask application.",
       "generator": "secret"
-    }
-  },
-  "environments": {
-    "test": {
-      "scripts": {
-        "test-setup": "python manage.py collectstatic --noinput",
-        "test": "python manage.py test"
-      }
     }
   }
 }

@@ -7,7 +7,6 @@ from pathlib import Path
 import yaml
 from collections import OrderedDict
 
-from dotenv import load_dotenv
 from cookiecutter.main import cookiecutter
 from cookiecutter.exceptions import RepositoryNotFound
 from flask import Flask, flash, request, redirect, url_for, render_template, send_file
@@ -15,14 +14,17 @@ from werkzeug.utils import secure_filename
 
 
 # Configuration.
-load_dotenv()
 FILESIZE_LIMIT_UNCOMPRESSED = 25 # Mb
 FILESIZE_LIMIT_COMPRESSED = 100 # Mb
+
+if 'DYNO' in os.environ:
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+else:
+    app.config['SECRET_KEY'] = 'dev'
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = FILESIZE_LIMIT_UNCOMPRESSED * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['CLEANUP'] = False
 
 @app.route('/')
