@@ -56,14 +56,14 @@ def upload_zip():
     """Upload a zip file (execute a user's uploaded Rubric and values)."""
 
     if 'file' not in request.files:
-        flash('No file received')
+        flash('Error: No file received', 'is-danger')
         return redirect('/')
     file = request.files['file']
     if not file or file.filename == '':
-        flash('No selected file')
+        flash('Error: No selected file', 'is-danger')
         return redirect('/')
     if not allowed_file(file.filename):
-        flash('Expected a zip file')
+        flash('Error: Expected a zip file', 'is-danger')
         return redirect('/')
 
     if 42:
@@ -87,10 +87,10 @@ def upload_zip():
         # Limitation checks.
         with zipfile.ZipFile(save_location, 'r') as zip_ref:
             if not uncompressed_filesize_ok(zip_ref):
-                flash('Uncompressed filesize too large')
+                flash(f'Error: Uncompressed filesize >{FILESIZE_LIMIT_UNCOMPRESSED}Mb', 'is-danger')
                 return redirect('/')
             if contains_nested_zip(zip_ref):
-                flash('Zip file cannot contain another zip file')
+                flash('Error: Zip file cannot contain another zip file', 'is-danger')
                 return redirect('/')
 
         # Unzip.
@@ -103,11 +103,11 @@ def upload_zip():
                 with open(values_path) as values_file_handle:
                     vals = load_values(values_file_handle, yaml.SafeLoader)
             except FileNotFoundError as e:
-                flash('values.yml missing')
+                flash('values.yml missing', 'is-danger')
                 return redirect('/')
             cookiecutter(extract_path, no_input=True, output_dir=generated_path, extra_context=vals)
         except RepositoryNotFound as e:
-            flash('Not a valid Rubric template (no rubric.yml in the top level of the zip at ' + extract_path + ' or values.yml missing')
+            flash('Error: not a valid Rubric template - no rubric.yml in the top level of the zip', 'is-danger')
             return redirect('/')
 
         # Zip up.

@@ -1,17 +1,59 @@
-<!doctype html>
-<title>Upload new File</title>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-	<ul class="flashes">
-	  {% for message in messages %}
-		<div class="message_flash">{{ message }}</div>
-	  {% endfor %}
-	</ul>
-  {% endif %}
-{% endwith %}
-<h1>Upload new File</h1>
-<form method=post action="/upload-zip" enctype=multipart/form-data>
-  <input type=file name=file>
-  <input type=submit value=Upload>
-</form>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello Bulma!</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/flatly/bulmaswatch.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+          {% if messages %}
+              {% for category, message in messages %}
+              <div class="notification {{ category }}">
+                  <button class="delete"></button>
+                  {{ message }}
+                </div>
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
+      <h1 class="title">
+        Process a Rubric template
+      </h1>
+      <p class="subtitle">
+        Upload your zip...
+      </p>
+
+        <form method=post action="/upload-zip" enctype=multipart/form-data>
+        <div class="file is-boxed">
+          <label class="file-label">
+            <input class="file-input" type="file" name="file">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-upload"></i>
+              </span>
+              <span class="file-label">
+                Select your zip…
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <br><br>
+
+        <div class="control">
+          <button class="button is-primary">Process</button>
+        </div>
+
+        </form>
+
+    </div>
+  </section>
+  </body>
+</html>
+
 
