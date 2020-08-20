@@ -13,6 +13,8 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 
 
+app = Flask(__name__)
+
 # Configuration.
 FILESIZE_LIMIT_UNCOMPRESSED = 25 # Mb
 FILESIZE_LIMIT_COMPRESSED = 100 # Mb
@@ -22,7 +24,6 @@ if 'DYNO' in os.environ:
 else:
     app.config['SECRET_KEY'] = 'dev'
 
-app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = FILESIZE_LIMIT_UNCOMPRESSED * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['CLEANUP'] = False
