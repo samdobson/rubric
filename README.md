@@ -9,3 +9,7 @@ Effortlessly create standardised files and folders with your usual software.
 
 Prepare your template using {{ placeholders }} wherever you like, zip it up, and upload it.
 
+Use the hosted version at:
+https://
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
