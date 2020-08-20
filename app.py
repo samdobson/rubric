@@ -124,4 +124,5 @@ def upload_zip():
         newfilename = filename[:-4] + '-result.zip'
         return send_file(final_zip_path, as_attachment=True, attachment_filename=newfilename)
 
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug='DYNO' not in os.environ)
