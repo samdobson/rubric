@@ -12,23 +12,22 @@ Rubric is for anyone wanting to:
 
 ## How do I get started?
 
-Rubric templates are created using your usual software. Getting started is a 2 step process:
+Rubric templates are created with your usual software. Getting started is a 2 step process:
 
-1. Convert existing files into a template by inserting {{ placeholders }} 
+1. Convert existing files to a template by inserting {{ placeholders }} 
 in file contents, or in filenames or folder names.
 2. List placeholder names in rubric.txt for users to insert their own values.
-3. Share with your users, who can upload to:
-https://go-rubric.herokuapp.com](https://go-rubric.herokuapp.com)
-
+3. Zip and share with your users, who can complete rubric.txt and upload to:
+[https://go-rubric.herokuapp.com](https://go-rubric.herokuapp.com)
 
 Read the Quickstart guide for step-by-step instructions.
 
 ## For developers
 
-Rubric runs on cookiecutter, and aims to be fully backward-compatible. That means that:
+Rubric runs on a fork of cookiecutter and aims to be fully backward-compatible. This means that:
 
-* **Cookiecutter creators** can enable UI-based usage of their template
-by adding a badge to README.md
+* **Cookiecutter users** can generate projects with no Python installatiom and without touching a CLI.
+* **Cookiecutter maintainers** can support this by adding a badge to README.md
 
 Read the full developer's guide here.
 
